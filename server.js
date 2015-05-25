@@ -3,6 +3,11 @@
 
 //---------------------------------------------------------------------------Imports
 var http 			= require('http');
+var sys				= require('sys');
+var path 			= require('path');
+var exec 			= require('child_process').exec;
+var spawn 			= require('child_process').spawn;
+
 var httpServer   	= require('./src/httpServer');
 var WebSocketIO		= require('./src/wsio');
 
@@ -88,6 +93,48 @@ function setupListeners(wsio) {
 
 
 
+function executeConsoleCommand( cmd ) {
+	var child;
+	child = exec(cmd, function (error, stdout, stderr) {
+		sys.print('stdout: ' + stdout);
+		sys.print('stderr: ' + stderr);
+		if (error !== null) {
+			console.log('Command> exec error: ' + error);
+		}
+	});
+}
+
+function executeScriptFile( file ) {
+
+	output = "";
+
+    file = path.normalize(file); // convert Unix notation to windows
+    console.log('Launching script ', file);
+
+    var proc = spawn(file, []);
+
+    proc.stdout.on('data', function (data) {
+            console.log('stdout: ' + data);
+            output = output + data;
+    });
+    proc.stderr.on('data', function (data) {
+            console.log('stderr: ' + data);
+    });
+    proc.on('exit', function (code) {
+        console.log('child process exited with code ' + code);
+        //if (socket) socket.emit('return', {status: true, stdout: output});
+    });
+
+
+
+    console.log("Setting up delayed process kill");
+
+    setTimeout( function(){ proc.kill(); console.log("\nKilling process"); }, 6000);
+
+
+
+    return proc;
+}
 
 
 //---------------------------------------------------------------------------websocket listener functions
@@ -101,6 +148,11 @@ function wsPing(wsio, data) {
 
 function wsConsoleLog(wsio, data) {
 	console.log('---wsConsoleLog:' + data.comment);
+	//executeConsoleCommand( "echo wsConsoleLog activating executeConsoleCommand" );
+	
+	//executeConsoleCommand( "open -a TextEdit.app" );
+
+	executeScriptFile( "script/testScript" );
 } //end class
 
 
