@@ -5,6 +5,8 @@
 var http 			= require('http');
 var sys				= require('sys');
 var path 			= require('path');
+var fs 				= require('fs');
+var json5        	= require('json5');            // JSON format that allows comments
 var exec 			= require('child_process').exec;
 var spawn 			= require('child_process').spawn;
 
@@ -43,6 +45,30 @@ setInterval( function () {
 		console.log(global.timeCounter * 5);
 	}
 	, 5000);
+
+
+
+//testing file read
+var confContents = fs.readFileSync( "conf/cfg.json", "utf8" );
+console.log("Read file:");
+console.log(confContents);
+
+var confJson = json5.parse(confContents);
+
+console.log(confJson);
+console.dir(confJson);
+
+var constantContents = fs.readFileSync( "public/src/constants.js", "utf8" );
+
+console.log( constantContents );
+
+var constantJson = json5.parse(constantContents);
+
+
+console.log( constantJson );
+console.dir( constantJson );
+
+
 
 
 //---------------------------------------------------------------------------Function definitions

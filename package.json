@@ -16,6 +16,7 @@
 		}
 	],
 	"dependencies": {
+		"json5": "latest",
 		"mime": "latest",
 		"ws": "latest"
 	},
