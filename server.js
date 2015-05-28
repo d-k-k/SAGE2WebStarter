@@ -6,12 +6,14 @@ var http 			= require('http');
 var sys				= require('sys');
 var path 			= require('path');
 var fs 				= require('fs');
-var json5        	= require('json5');            // JSON format that allows comments
+var json5        	= require('json5');            // format that allows comments
 var exec 			= require('child_process').exec;
 var spawn 			= require('child_process').spawn;
 
 var httpServer   	= require('./src/httpServer');
 var WebSocketIO		= require('./src/wsio');
+var md5				= require('./src/md5');                   // return standard md5 hash of given param
+var utils			= require('./src/utils');
 
 //---------------------------------------------------------------------------Variable setup
 var hostAddress		= "127.0.0.1";
@@ -49,24 +51,9 @@ setInterval( function () {
 
 
 //testing file read
-var confContents = fs.readFileSync( "conf/cfg.json", "utf8" );
-console.log("Read file:");
-console.log(confContents);
-
-var confJson = json5.parse(confContents);
-
-console.log(confJson);
-console.dir(confJson);
-
-var constantContents = fs.readFileSync( "public/src/constants.js", "utf8" );
-
-console.log( constantContents );
-
-var constantJson = json5.parse(constantContents);
-
-
-console.log( constantJson );
-console.dir( constantJson );
+// var confContents = fs.readFileSync( "conf/cfg.json", "utf8" );
+// console.log("Read file:");
+// console.log(confContents);
 
 
 
@@ -114,6 +101,9 @@ function setupListeners(wsio) {
 	
 	wsio.on('ping',            wsPing);
 	wsio.on('consoleLog',      wsConsoleLog);
+	wsio.on('convertTomd5',      wsConvertTomd5);
+	wsio.on('requestForConfig',      wsRequestForConfig);
+	wsio.on('newConfigSettings',      wsNewConfigSettings);
 
 } //end setupListeners
 
@@ -181,7 +171,44 @@ function wsConsoleLog(wsio, data) {
 	executeScriptFile( "script/testScript" );
 } //end class
 
+function wsConvertTomd5(wsio, data) {
+	var conversion = md5.getHash( data.phrase );
+	wsio.emit('convertedMd5', { md5: conversion });
+} //end class
 
+
+function wsRequestForConfig(wsio, data) {
+
+	console.log(' Checking file. ');
+
+	var confLocation = "conf/cfg.json";
+	// if( ! utils.fileExists(confLocation) ) { return; }
+
+	console.log(' Reading and sending config file contents. ');
+
+
+	var confContents = fs.readFileSync( confLocation, "utf8" );
+	confContents = json5.parse(confContents);
+
+	var configData = {
+		port: confContents.port ,
+		rWidth: confContents.resolution.width,
+		rHeight: confContents.resolution.height,
+		lRows: confContents.layout.rows,
+		lColumns: confContents.layout.columns
+	}
+
+	wsio.emit( 'configContents', configData );
+
+} //end class
+
+
+function wsNewConfigSettings(wsio, data) {
+	var jsonString = json5.stringify(data);
+	var confLocation = "conf/cfg.json";
+	fs.writeFileSync( confLocation, jsonString);
+
+} //end class
 //---------------------------------------------------------------------------Utility functions
 
 

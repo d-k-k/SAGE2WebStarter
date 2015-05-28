@@ -67,4 +67,32 @@ function setupListeners() {
 		console.log('Recieved a ping back from the server');
 		console.dir(data);
 	});
+
+
+	wsio.on('convertedMd5' , wsConvertedMd5) ;
+	wsio.on('configContents' , wsConfigContents) ;
+
 }
+
+function wsConvertedMd5 (data) {
+	var resultDiv = document.getElementById('md5result');
+
+	resultDiv.innerHTML = 'Result: ' + data.md5;
+}
+
+
+function wsConfigContents (data) {
+	var workingDiv = document.getElementById('confPort');
+	workingDiv.value = data.port;
+	workingDiv = document.getElementById('confResolutionWidth');
+	workingDiv.value = data.rWidth;
+	workingDiv = document.getElementById('confResolutionHeight');
+	workingDiv.value = data.rHeight;
+	workingDiv = document.getElementById('confLayoutRows');
+	workingDiv.value = data.lRows;
+	workingDiv = document.getElementById('confLayoutColumns');
+	workingDiv.value = data.lColumns;
+}
+
+
+

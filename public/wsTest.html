@@ -20,7 +20,26 @@
 This is an index page.
 
 <button onclick="sendPing()"> send ping </button>
+<br><br><br>
 <button onclick="sendConsoleLog()"> Send consoleLog packet </button>
+<br><br><br>
+
+Convert to md5
+<input type="text" id="phraseValue">
+<button class="button_session" type="button" id="enterButton" onclick="sendConvertTomd5()"> Enter </button>
+<br>
+<div id='md5result'>Result: </div>
+
+<br><br><br>
+
+<button onclick="sendRequestForConfig()"> Retrieve config file values on server </button>
+Port: <input type="text" id="confPort">
+<br>
+Resolution Width: <input type="text" id="confResolutionWidth"> Height: <input type="text" id="confResolutionHeight">
+<br>
+Layout Rows: <input type="text" id="confLayoutRows"> Columns: <input type="text" id="confLayoutColumns">
+<br>
+<button onclick="sendNewConfigSettings()"> Send current settings to server </button>
 
 </body>
 
@@ -34,6 +53,30 @@ function sendPing() {
 function sendConsoleLog() {
 	wsio.emit('consoleLog', { comment: 'button was pressed' } );
 }
+
+function sendConvertTomd5() {
+	var inputPhrase = document.getElementById('phraseValue').value;
+	wsio.emit('convertTomd5', { phrase: inputPhrase })
+}
+
+function sendRequestForConfig() {
+	wsio.emit( 'requestForConfig' );
+	console.log('sent request for config');
+}
+
+function sendNewConfigSettings() {
+	var configData = {
+			port: document.getElementById('confPort').value,
+			resolution: { width: document.getElementById('confResolutionWidth').value, height: document.getElementById('confResolutionHeight').value},
+			layout: { rows: document.getElementById('confLayoutRows').value, columns: document.getElementById('confLayoutColumns').value }
+	};
+
+
+	wsio.emit( 'newConfigSettings', configData );
+}
+
+
+
 
 
 </script>
