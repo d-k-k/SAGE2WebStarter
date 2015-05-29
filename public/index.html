@@ -1,74 +1,167 @@
 
+
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="icon" href="favicon.ico">
+<html>
 
-    <title>SAGE2 Menu</title>
+<head lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, minimum-scale=1.0, user-scalable=1" />
 
-    <!-- Bootstrap core CSS -->
-    <link href="src/bootstrap.min.css" rel="stylesheet">
+    <title>Test page for ping and console</title>
+
+    <script type="text/javascript" src="src/websocket.io.js"></script>
+    <script type="text/javascript" src="src/pacSetup.js"></script>
 
 
-  </head>
+</head>
+
+<body onload="initialize()">
 
 
 
+<div style="text-align:center; background-color:lightblue">
+
+    <div onclick="toggleDivView('expSageStart')">
+        <h1 style='background-color:green'>Start Sage</h1>
+    </div>
+    <div id='expSageStart' style='display:none'>
+        Expanded start area.
+    </div>
+
+    <div onclick="toggleDivView('expSageStop')">
+        <h1 style='background-color:red'>Stop Sage</h1>
+    </div>
+    <div id='expSageStop' style='display:none'>
+        Expanded stop area.
+    </div>
+
+    <div onclick="toggleDivView('expSetPassword')">
+        <h1 style='background-color:gray'>Set Password</h1>
+    </div>
+    <div id='expSetPassword' style='display:none'>
+        Expanded password area
+    </div>
+
+    <div onclick="toggleDivView('expConfiguration')">
+        <h1 style='background-color:gray'>Configuration</h1>
+    </div>
+    <div id='expConfiguration' style='display:none'>
+        Expanded configuration area
+    </div>
 
 
+    <div>
+        <br>
+    </div>
 
 
-
-  <body>
-
-
-    <div class="container">
-
-
-
-
-
-        <h1>SAGE2</h1>
-        <p class="lead">Am I doing this correctly</p>
-
-		<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-		  <div class="panel panel-default">
-		    <div class="panel-heading" role="tab" id="headingOne">
-		      <h4 class="panel-title">
-		        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-		          Settings
-		        </a>
-		      </h4>
-		    </div>
-		    <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-		      <div class="panel-body">
-		        
-		      	Put settings buttons here.
-
-		      </div>
-		    </div>
-		  </div>
-		</div>
-
-
+</div>
 
 
 
 
 
 
-    </div><!-- /.container -->
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="src/bootstrap.min.js"></script>
-  </body>
+
+
+This is an index page.
+
+<button onclick="sendPing()"> send ping </button>
+<br><br><br>
+<button onclick="sendConsoleLog()"> Send consoleLog packet </button>
+<br><br><br>
+
+Convert to md5
+<input type="text" id="phraseValue">
+<button class="button_session" type="button" id="enterButton" onclick="sendConvertTomd5()"> Enter </button>
+<br>
+<div id='md5result'>Result: </div>
+
+<br><br><br>
+
+<button onclick="sendRequestForConfig()"> Retrieve config file values on server </button>
+Port: <input type="text" id="confPort">
+<br>
+Resolution Width: <input type="text" id="confResolutionWidth"> Height: <input type="text" id="confResolutionHeight">
+<br>
+Layout Rows: <input type="text" id="confLayoutRows"> Columns: <input type="text" id="confLayoutColumns">
+<br>
+<button onclick="sendNewConfigSettings()"> Send current settings to server </button>
+
+
+<br><br><br><br>
+
+<div>
+    <div >
+        <h1 onclick="toggleDivView('passwordInput')" style='background-color:gray'> Show Password Input </h1>
+    </div>
+<button onclick="toggleDivView('passwordInput')"> Show Password Input </button>
+</div>
+<div id = 'passwordInput' style='display:none' >
+This div will have it's visibility toggled.
+<br>
+One more line
+<br>
+Last line.
+</div>
+
+<br>
+This is after the hidden div.
+
+
+
+
+
+
+</body>
+
+
+<script type="text/javascript">
+
+function sendPing() {
+    wsio.emit('ping', { time: new Date().toJSON() } );
+}
+
+function sendConsoleLog() {
+    wsio.emit('consoleLog', { comment: 'button was pressed' } );
+}
+
+function sendConvertTomd5() {
+    var inputPhrase = document.getElementById('phraseValue').value;
+    wsio.emit('convertTomd5', { phrase: inputPhrase })
+}
+
+function sendRequestForConfig() {
+    wsio.emit( 'requestForConfig' );
+    console.log('sent request for config');
+}
+
+function sendNewConfigSettings() {
+    var configData = {
+            port: document.getElementById('confPort').value,
+            resolution: { width: document.getElementById('confResolutionWidth').value, height: document.getElementById('confResolutionHeight').value},
+            layout: { rows: document.getElementById('confLayoutRows').value, columns: document.getElementById('confLayoutColumns').value }
+    };
+
+
+    wsio.emit( 'newConfigSettings', configData );
+}
+
+
+function toggleDivView(divID) {
+    var workingDiv = document.getElementById(divID);
+
+    if(workingDiv.style.display === 'block') { workingDiv.style.display = 'none'; }
+    else { workingDiv.style.display = 'block'; } 
+
+} //end toggle
+
+
+
+
+</script>
+
+
 </html>
+
