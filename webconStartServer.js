@@ -51,7 +51,7 @@ setInterval( function () {
 
 
 //testing file read
-// var confContents = fs.readFileSync( "conf/cfg.json", "utf8" );
+// var confContents = fs.readFileSync( "config/default-cfg.json", "utf8" );
 // console.log("Read file:");
 // console.log(confContents);
 
@@ -189,7 +189,7 @@ function wsRequestForConfig(wsio, data) {
 
 	console.log(' Checking file. ');
 
-	var confLocation = "conf/cfg.json";
+	var confLocation = "config/default-cfg.json";
 	// if( ! utils.fileExists(confLocation) ) { return; }
 
 	console.log(' Reading and sending config file contents. ');
@@ -213,9 +213,9 @@ function wsRequestForConfig(wsio, data) {
 
 function wsNewConfigSettings(wsio, data) {
 	var jsonString = json5.stringify(data);
-	var confLocation = "conf/cfg.json";
+	var confLocation = "config/default-cfg.json";
 	var jsonString = json5.stringify(data);
-	var confLocation = "conf/cfg.json";
+	var confLocation = "config/default-cfg.json";
 	fs.writeFileSync( confLocation, jsonString);
 	fs.writeFileSync( confLocation, jsonString);
 
@@ -225,7 +225,7 @@ function wsNewConfigSettings(wsio, data) {
 
 function wsGiveClientConfiguration(wsio, data) {
 
-	var confLocation = "conf/cfg.json";
+	var confLocation = "config/default-cfg.json";
 	var confContents = fs.readFileSync( confLocation, "utf8" );
 	confContents = json5.parse(confContents);
 
@@ -238,7 +238,7 @@ function wsGiveServerConfiguration(wsio, data) {
 
 	//first grab original configuration
 	//reasoning is to maintain fields.
-	var confLocation = "conf/cfg.json";
+	var confLocation = "config/default-cfg.json";
 	var confContents = fs.readFileSync( confLocation, "utf8" );
 	confContents = json5.parse(confContents);
 

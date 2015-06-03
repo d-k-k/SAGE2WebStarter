@@ -2,5 +2,6 @@
 #ignore the node module download
 node_modules
 conf
+config
 keys
 
