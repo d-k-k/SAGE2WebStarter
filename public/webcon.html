@@ -32,11 +32,11 @@
 
 <div style="text-align:center; background-color:lightblue">
 
-    <div onclick="toggleDivView('expSageStart')">
+    <div onclick="startSage()">
         <h1 style='background-color:green'>Start Sage</h1>
     </div>
     <div id='expSageStart' class='hideExpand'>
-        Expanded start area.
+        Sage should have started
     </div>
 
     <div onclick="toggleDivView('expSageStop')">
@@ -413,6 +413,17 @@ function checkPasswordToServer() {
     console.log('Sending    ' + packet.password + '    to check against the password.');
     wsio.emit('checkPassword', packet);
 }
+
+function startSage() {
+    
+    var workingDiv = document.getElementById('expSageStart');
+
+    if(workingDiv.className.indexOf('showExpand') < 0) {
+        wsio.emit('startSage');
+        workingDiv.className = 'showExpand';
+    }
+
+} //end startSage
 
 
 </script>

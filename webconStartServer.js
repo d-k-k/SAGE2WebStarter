@@ -111,6 +111,7 @@ function setupListeners(wsio) {
 	wsio.on('giveServerConfiguration',		wsGiveServerConfiguration);
 	wsio.on('setPassword',					wsSetPassword);
 	wsio.on('checkPassword',				wsCheckPassword);
+	wsio.on('startSage',					wsStartSage);
 
 
 } //end setupListeners
@@ -320,6 +321,11 @@ function wsCheckPassword(wsio, data) {
 
 
 } //wsCheckPassword
+
+function wsStartSage(wsio, data) {
+	executeConsoleCommand('node server.js');
+}
+
 
 //---------------------------------------------------------------------------Utility functions
 

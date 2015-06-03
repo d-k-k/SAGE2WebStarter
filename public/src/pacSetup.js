@@ -168,7 +168,7 @@ function wsGiveClientConfiguration(data) {
 
 
 
-function wsPasswordCheckResult(data) {
+function wsPasswordCheckResult(data) {	
 	var workingDiv;
 	workingDiv = document.getElementById('checkPasswordResult');
 	if(data.result === true) {
