@@ -99,11 +99,18 @@ When receiving a packet of the named type, call the function.
 */
 function setupListeners(wsio) {
 	
-	wsio.on('ping',            wsPing);
-	wsio.on('consoleLog',      wsConsoleLog);
-	wsio.on('convertTomd5',      wsConvertTomd5);
-	wsio.on('requestForConfig',      wsRequestForConfig);
-	wsio.on('newConfigSettings',      wsNewConfigSettings);
+	wsio.on('ping',            		wsPing);
+	wsio.on('consoleLog',      		wsConsoleLog);
+	wsio.on('convertTomd5',      	wsConvertTomd5);
+	wsio.on('requestForConfig',     wsRequestForConfig);
+	wsio.on('newConfigSettings',    wsNewConfigSettings);
+
+
+	//should be functions to keep
+	wsio.on('giveClientConfiguration',		wsGiveClientConfiguration);
+	wsio.on('giveServerConfiguration',		wsGiveServerConfiguration);
+	wsio.on('setPassword',					wsSetPassword);
+
 
 } //end setupListeners
 
@@ -209,6 +216,79 @@ function wsNewConfigSettings(wsio, data) {
 	fs.writeFileSync( confLocation, jsonString);
 
 } //end class
+
+
+
+function wsGiveClientConfiguration(wsio, data) {
+
+	var confLocation = "conf/cfg.json";
+	var confContents = fs.readFileSync( confLocation, "utf8" );
+	confContents = json5.parse(confContents);
+
+	wsio.emit( 'giveClientConfiguration', confContents );
+
+} //wsGiveClientConfiguration
+
+function wsGiveServerConfiguration(wsio, data) {
+	//!!!! ASSUMPTION !!!!
+	//the numberical values being sent are already correctly type casted.
+
+	//first grab original configuration
+	//reasoning is to maintain fields.
+	var confLocation = "conf/cfg.json";
+	var confContents = fs.readFileSync( confLocation, "utf8" );
+	confContents = json5.parse(confContents);
+
+	confContents.host = data.host;
+	confContents.port = data.port;
+	confContents.index_port = data.index_port;
+	//confContents.register_site = true;
+	confContents.resolution.width = data.resolution.width;
+	confContents.resolution.height = data.resolution.height;
+
+	//if the layout changed.
+	if(  (confContents.layout.rows != data.layout.rows)  ||  (confContents.layout.columns = data.layout.columns)  ) {
+		confContents.layout.rows = data.layout.rows;
+		confContents.layout.columns = data.layout.columns;
+		
+		//diplays loop
+		confContents.displays = [];
+		var d = {};
+		for(var r = 0; r < confContents.layout.rows; r++) {
+			for(var c = 0; c < confContents.layout.columns; c++) {
+				d.row = r;
+				d.column = c;
+				confContents.displays.push(d);
+			}
+		}
+
+	} //end if the layout changed
+
+
+	confContents.alternate_hosts = data.alternate_hosts; //translation of dependencies.
+	confContents.remote_sites = data.remote_sites; 
+	if(data.dependencies.ImageMagick != null) { confContents.dependencies.ImageMagick = data.dependencies.ImageMagick;  } 
+	if(data.dependencies.FFMpeg != null) { confContents.dependencies.FFMpeg = data.dependencies.FFMpeg;  } 
+
+
+
+
+
+	wsio.emit('configurationSet');
+
+} //wsGiveServerConfiguration
+
+function wsSetPassword(wsio, data) {
+	var conversion = md5.getHash( data.password );
+	var jsonString = { pwd: conversion};
+	jsonString = json5.stringify(jsonString);
+	var pwdFileLocation = "keys/passwd.json";
+	fs.writeFileSync( pwdFileLocation, jsonString);
+
+	wsio.emit('passwordSet');
+} //wsSetPassword
+
+
 //---------------------------------------------------------------------------Utility functions
 
 

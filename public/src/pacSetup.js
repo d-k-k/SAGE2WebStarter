@@ -72,6 +72,16 @@ function setupListeners() {
 	wsio.on('convertedMd5' , wsConvertedMd5) ;
 	wsio.on('configContents' , wsConfigContents) ;
 
+
+
+
+
+
+	wsio.on('giveClientConfiguration', 		wsGiveClientConfiguration );
+	wsio.on('passwordSet', 					function(data) { console.log('The password has been confirmed to be set by server'); });
+	wsio.on('configurationSet', 			function(data) { console.log('The configuration file has been confirmed to be updated by server'); });
+
+
 }
 
 function wsConvertedMd5 (data) {
@@ -93,6 +103,80 @@ function wsConfigContents (data) {
 	workingDiv = document.getElementById('confLayoutColumns');
 	workingDiv.value = data.lColumns;
 }
+
+function wsGiveClientConfiguration(data) {
+	var workingDiv;
+
+	workingDiv = document.getElementById('cfgHost');
+	workingDiv.value = data.host;
+
+	workingDiv = document.getElementById('cfgPortDefault');
+	workingDiv.value = data.index_port;
+
+	workingDiv = document.getElementById('cfgPortSecure');
+	workingDiv.value = data.port;
+
+	workingDiv = document.getElementById('cfgRwidth');
+	workingDiv.value = data.resolution.width;
+
+	workingDiv = document.getElementById('cfgRheight');
+	workingDiv.value = data.resolution.height;
+
+	workingDiv = document.getElementById('cfgLrows');
+	workingDiv.value = data.layout.rows;
+
+	workingDiv = document.getElementById('cfgLcolumns');
+	workingDiv.value = data.layout.columns;
+
+
+
+	for(var i = 0; i < data.alternate_hosts.length; i++) {
+		workingDiv = document.getElementById('cfgAH' + (i+1) );
+		if(workingDiv == null) { addAlternativeHostEntry(); }
+	}
+	for(var i = 0; i < data.alternate_hosts.length; i++) {
+		workingDiv = document.getElementById('cfgAH' + (i+1) );
+		if(workingDiv == null) { console.log('error adding alternate_hosts'); }
+		else { workingDiv.value = data.alternate_hosts[i]; }
+	}
+
+
+	for(var i = 0; i < data.remote_sites.length; i++) {
+		workingDiv = document.getElementById('cfgRS' + (i+1) + 'name');
+		if(workingDiv == null) { addRemoteSiteEntry(); }
+	}
+	for(var i = 0; i < data.remote_sites.length; i++) {
+		workingDiv = document.getElementById('cfgRS' + (i+1) + 'name');
+		if(workingDiv == null) { console.log('error adding alternate_hosts'); }
+		else { workingDiv.value = data.remote_sites[i].name; }
+		workingDiv = document.getElementById('cfgRS' + (i+1) + 'host');
+		workingDiv.value = data.remote_sites[i].host; 
+		workingDiv = document.getElementById('cfgRS' + (i+1) + 'port');
+		workingDiv.value = data.remote_sites[i].port; 
+		workingDiv = document.getElementById('cfgRS' + (i+1) + 'secure');
+		workingDiv.value = data.remote_sites[i].secure; 
+	}
+
+
+	workingDiv = document.getElementById('cfgDependencyIM');
+	workingDiv.value = data.dependencies.ImageMagick;
+
+	workingDiv = document.getElementById('cfgDependencyFFM');
+	workingDiv.value = data.dependencies.FFMpeg;
+
+} //end wsGiveClientConfiguration
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

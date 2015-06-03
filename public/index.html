@@ -50,7 +50,9 @@
         <h1 style='background-color:gray'>Set Password</h1>
     </div>
     <div id='expSetPassword' class='hideExpand'>
-        Expanded password area
+        Will take effect on next Sage startup.<br>
+        <input type="text" id="setPasswordValue"><br>
+        <button onclick="setPasswordToServer()"> Set Password </button>
     </div>
 
     <div onclick="toggleDivView('expConfiguration')">
@@ -58,10 +60,11 @@
     </div>
     <div id='expConfiguration' class='hideExpand'>
 
-        Required Configuration Settings<br>
+        Required Configuration Settings<br><br><br><br>
 
 
-        Host name / ip: <input type="text" id="cfgPort"> (⍰)
+
+        Host name / ip: <input type="text" id="cfgHost"> (⍰)
         <br>
         Port: <input type="text" id="cfgPortDefault"> (Default: 80 )
         <br>
@@ -75,9 +78,9 @@
         <br>
         Layout:
         <br>
-        --Rows <input type="text" id="cfgLrows">
+        --Columns <input type="text" id="cfgLcolumns"> (Width)
         <br>
-        --Columns <input type="text" id="cfgLcolumns">
+        --Rows <input type="text" id="cfgLrows"> (Height)
         <br>
         Alternate Hosts:
         <br>
@@ -108,6 +111,10 @@
         ImageMagick:<input type='text' id='cfgDependencyIM'>
         <br>
         FFMpeg:<input type='text' id='cfgDependencyFFM'>
+        <br>
+        <br>
+
+        <button onclick="sendConfigFileData()"> Save </button>
 
 
         <div onclick="toggleDivView('expConfiguration1')">
@@ -132,61 +139,6 @@
 
 
 </div>
-
-
-
-
-
-<div style='display:none'>
-
-
-
-    This is an index page.
-
-    <button onclick="sendPing()"> send ping </button>
-    <br><br><br>
-    <button onclick="sendConsoleLog()"> Send consoleLog packet </button>
-    <br><br><br>
-
-    Convert to md5
-    <input type="text" id="phraseValue">
-    <button class="button_session" type="button" id="enterButton" onclick="sendConvertTomd5()"> Enter </button>
-    <br>
-    <div id='md5result'>Result: </div>
-
-    <br><br><br>
-
-    <button onclick="sendRequestForConfig()"> Retrieve config file values on server </button>
-    Port: <input type="text" id="confPort">
-    <br>
-    Resolution Width: <input type="text" id="confResolutionWidth"> Height: <input type="text" id="confResolutionHeight">
-    <br>
-    Layout Rows: <input type="text" id="confLayoutRows"> Columns: <input type="text" id="confLayoutColumns">
-    <br>
-    <button onclick="sendNewConfigSettings()"> Send current settings to server </button>
-
-
-    <br><br><br><br>
-
-    <div>
-        <div >
-            <h1 onclick="toggleDivView('passwordInput')" style='background-color:gray'> Show Password Input </h1>
-        </div>
-    <button onclick="toggleDivView('passwordInput')"> Show Password Input </button>
-    </div>
-    <div id = 'passwordInput' class='hideExpand'>
-    This div will have it's visibility toggled.
-    <br>
-    One more line
-    <br>
-    Last line.
-    </div>
-
-    <br>
-    This is after the hidden div.
-
-</div>
-
 
 
 
@@ -235,6 +187,14 @@ function toggleDivView(divID) {
 
     // if(workingDiv.style.display === 'block') { workingDiv.style.display = 'none'; }
     // else { workingDiv.style.display = 'block'; } 
+
+
+    if (divID ==="expConfiguration") {
+
+        getServerConfigFileData();
+
+
+    } //end 
 
 } //end toggle
 
@@ -299,9 +259,155 @@ function removeRemoteSiteEntry() {
 } //end addRemoteSiteEntry
 
 
+
+function getServerConfigFileData() {
+    console.log('getServerConfigFileData function called');
+} //end getServerConfigFileData
+
+
+function sendConfigFileData() {
+    console.log('sendConfigFileData function called');
+
+
+    var packet = {};
+    var workingDiv;
+
+
+    workingDiv = document.getElementById('cfgHost');
+    if( workingDiv == null || workingDiv.value.trim().length <= 0 ) {
+        console.log("Missing Host, not sending packet");
+        return;
+    }
+    packet.host = workingDiv.value.trim();
+
+
+
+    workingDiv = document.getElementById('cfgPortDefault');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Port default, not sending packet");
+        return;
+    }
+    packet.index_port = parseInt(workingDiv.value.trim());
+
+
+
+    workingDiv = document.getElementById('cfgPortSecure');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Port secure, not sending packet");
+        return;
+    }
+    packet.port = parseInt(workingDiv.value.trim());
+
+
+
+
+    workingDiv = document.getElementById('cfgRwidth');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Resolution Width, not sending packet");
+        return;
+    }
+    workingDiv = document.getElementById('cfgRheight');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Resolution height, not sending packet");
+        return;
+    }
+    packet.resolution = {};
+    packet.resolution.height = parseInt( workingDiv.value.trim() );
+    workingDiv = document.getElementById('cfgRwidth');
+    packet.resolution.width = parseInt( workingDiv.value.trim() );
+
+
+    workingDiv = document.getElementById('cfgLrows');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Layout rows, not sending packet");
+        return;
+    }
+    workingDiv = document.getElementById('cfgLcolumns');
+    if( workingDiv == null || isNaN( workingDiv.value.trim() ) ) {
+        console.log("Missing Layout columns, not sending packet");
+        return;
+    }
+    packet.layout = {};
+    packet.layout.columns = parseInt( workingDiv.value.trim() );
+    workingDiv = document.getElementById('cfgLrows');
+    packet.layout.rows = parseInt( workingDiv.value.trim() );
+
+
+    packet.alternate_hosts = [];
+    var x;
+    for (x = 1; x < 100; x++) {
+        workingDiv = document.getElementById('cfgAH' + x);
+        if(workingDiv == null) {
+            break;
+        }
+        if(workingDiv.value.trim().length > 0) { packet.alternate_hosts.push( workingDiv.value.trim() ); }
+    }
+
+    packet.remote_sites = [];
+    var remoteSite = {};
+    for (x = 1; x < 100; x++) {
+        workingDiv = document.getElementById('cfgRS' + x + 'name');
+
+        if(workingDiv == null) {
+            break;
+        }
+        if(workingDiv.value.trim().length > 0) { remoteSite.name =  workingDiv.value.trim(); }
+        else { continue; }
+        workingDiv = document.getElementById('cfgRS' + x + 'host');
+        if(workingDiv.value.trim().length > 0) { remoteSite.host =  workingDiv.value.trim(); }
+        else { continue; }
+        workingDiv = document.getElementById('cfgRS' + x + 'port');
+        if(workingDiv.value.trim().length > 0) { remoteSite.port =  workingDiv.value.trim(); }
+        else { continue; }
+        workingDiv = document.getElementById('cfgRS' + x + 'secure');
+        if(workingDiv.value.trim().length > 0) { remoteSite.secure =  workingDiv.value.trim(); }
+        else { continue; }
+        packet.remote_sites.push( remoteSite );
+    }
+
+    packet.dependencies = {};
+
+    workingDiv = document.getElementById('cfgDependencyIM');
+    if( workingDiv == null || workingDiv.value.trim().length <= 0 ) { }
+    else { packet.ImageMagick = workingDiv.value.trim(); }
+
+
+    workingDiv = document.getElementById('cfgDependencyFFM');
+    if( workingDiv == null || workingDiv.value.trim().length <= 0 ) { }
+    else { packet.FFMpeg = workingDiv.value.trim(); }
+
+
+    console.log('Ready to send config to server, contents:');
+    console.dir( packet );
+
+
+} //end sendConfigFileData
+
+function setPasswordToServer() {
+    var workingDiv = document.getElementById('setPasswordValue');
+    var packet = {};
+    packet.password = workingDiv.value.trim();
+
+    console.log('Sending    ' + packet.password + '    as the new password.');
+}
+
+
+
 </script>
 
 
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
 
