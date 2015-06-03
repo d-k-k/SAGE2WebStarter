@@ -80,7 +80,7 @@ function setupListeners() {
 	wsio.on('giveClientConfiguration', 		wsGiveClientConfiguration );
 	wsio.on('passwordSet', 					function(data) { console.log('The password has been confirmed to be set by server'); });
 	wsio.on('configurationSet', 			function(data) { console.log('The configuration file has been confirmed to be updated by server'); });
-
+	wsio.on('passwordCheckResult', 			wsPasswordCheckResult );
 
 }
 
@@ -168,7 +168,16 @@ function wsGiveClientConfiguration(data) {
 
 
 
-
+function wsPasswordCheckResult(data) {
+	var workingDiv;
+	workingDiv = document.getElementById('checkPasswordResult');
+	if(data.result === true) {
+		workingDiv.innerHTML = "Result: True";
+	}
+	else {
+		workingDiv.innerHTML = "Result: False";
+	}
+} //end wsPasswordCheckResult
 
 
 

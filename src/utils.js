@@ -14,7 +14,7 @@ var fs     = require('fs');                  // filesystem access
  * @return {Bool} true if readable
  */
 function fileExists(filename) {
-	if (process.version === 10 || process.version === 11) {
+	if (process.version.indexOf('0.10.') > 0 || process.version.indexOf('0.11.') > 0 ) {
 		return fs.existsSync(filename);
 	} else {
 		// Versions 1.x or above

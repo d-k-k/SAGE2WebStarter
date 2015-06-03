@@ -110,6 +110,7 @@ function setupListeners(wsio) {
 	wsio.on('giveClientConfiguration',		wsGiveClientConfiguration);
 	wsio.on('giveServerConfiguration',		wsGiveServerConfiguration);
 	wsio.on('setPassword',					wsSetPassword);
+	wsio.on('checkPassword',				wsCheckPassword);
 
 
 } //end setupListeners
@@ -213,6 +214,9 @@ function wsRequestForConfig(wsio, data) {
 function wsNewConfigSettings(wsio, data) {
 	var jsonString = json5.stringify(data);
 	var confLocation = "conf/cfg.json";
+	var jsonString = json5.stringify(data);
+	var confLocation = "conf/cfg.json";
+	fs.writeFileSync( confLocation, jsonString);
 	fs.writeFileSync( confLocation, jsonString);
 
 } //end class
@@ -226,7 +230,6 @@ function wsGiveClientConfiguration(wsio, data) {
 	confContents = json5.parse(confContents);
 
 	wsio.emit( 'giveClientConfiguration', confContents );
-
 } //wsGiveClientConfiguration
 
 function wsGiveServerConfiguration(wsio, data) {
@@ -272,6 +275,8 @@ function wsGiveServerConfiguration(wsio, data) {
 
 
 
+	confContents = json5.stringify(confContents);
+	fs.writeFileSync( confLocation, confContents);
 
 
 	wsio.emit('configurationSet');
@@ -288,6 +293,33 @@ function wsSetPassword(wsio, data) {
 	wsio.emit('passwordSet');
 } //wsSetPassword
 
+
+function wsCheckPassword(wsio, data) {
+	var conversion = md5.getHash( data.password );
+
+
+
+	var pwdFileLocation = "keys/passwd.json";
+	var jsonString;
+	if( utils.fileExists(pwdFileLocation) ) {
+		jsonString = fs.readFileSync( pwdFileLocation, "utf8" );
+		jsonString = json5.parse(jsonString);
+	}
+	else {  jsonString = { pwd: -1 };  }
+
+	console.log();
+	console.log('process version?' + process.version + "   and type of" + typeof process.version);
+	console.log('Checking ' + data.password + ' which has a hash of');
+	console.log(conversion + ' against ');
+	console.log( jsonString.pwd );
+
+
+
+	if( jsonString.pwd === conversion) { wsio.emit('passwordCheckResult', { result: true } ); }
+	else { wsio.emit('passwordCheckResult', { result: false } ); }
+
+
+} //wsCheckPassword
 
 //---------------------------------------------------------------------------Utility functions
 

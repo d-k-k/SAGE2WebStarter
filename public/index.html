@@ -50,9 +50,19 @@
         <h1 style='background-color:gray'>Set Password</h1>
     </div>
     <div id='expSetPassword' class='hideExpand'>
-        Will take effect on next Sage startup.<br>
-        <input type="text" id="setPasswordValue"><br>
+        Will take effect on next Sage startup.
+        <br>
+        <input type="text" id="setPasswordValue">
+        <br>
         <button onclick="setPasswordToServer()"> Set Password </button>
+        <br><br><br>
+        Test current password:
+        <br>
+        <input type="text" id="checkPasswordValue">
+        <br>
+        <button onclick="checkPasswordToServer()"> Check Password </button>
+        <br>
+        <div id='checkPasswordResult'> </div>
     </div>
 
     <div onclick="toggleDivView('expConfiguration')">
@@ -262,6 +272,7 @@ function removeRemoteSiteEntry() {
 
 function getServerConfigFileData() {
     console.log('getServerConfigFileData function called');
+    wsio.emit('giveClientConfiguration');
 } //end getServerConfigFileData
 
 
@@ -380,6 +391,7 @@ function sendConfigFileData() {
     console.log('Ready to send config to server, contents:');
     console.dir( packet );
 
+    wsio.emit('giveServerConfiguration', packet);
 
 } //end sendConfigFileData
 
@@ -389,8 +401,18 @@ function setPasswordToServer() {
     packet.password = workingDiv.value.trim();
 
     console.log('Sending    ' + packet.password + '    as the new password.');
+
+    wsio.emit('setPassword', packet);
 }
 
+function checkPasswordToServer() {
+    var workingDiv = document.getElementById('checkPasswordValue');
+    var packet = {};
+    packet.password = workingDiv.value.trim();
+
+    console.log('Sending    ' + packet.password + '    to check against the password.');
+    wsio.emit('checkPassword', packet);
+}
 
 
 </script>
