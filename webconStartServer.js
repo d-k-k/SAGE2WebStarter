@@ -286,9 +286,11 @@ function wsGiveServerConfiguration(wsio, data) {
 
 function wsSetPassword(wsio, data) {
 	var conversion = md5.getHash( data.password );
-	var jsonString = { pwd: conversion};
+	var jsonString = { "pwd": conversion};
 	jsonString = json5.stringify(jsonString);
+	jsonString = '{ "pwd" : "' + conversion +'" }';
 	var pwdFileLocation = "keys/passwd.json";
+	console.log('Pasword save double checking:' + jsonString);
 	fs.writeFileSync( pwdFileLocation, jsonString);
 
 	wsio.emit('passwordSet');
@@ -323,7 +325,13 @@ function wsCheckPassword(wsio, data) {
 } //wsCheckPassword
 
 function wsStartSage(wsio, data) {
+	console.log();
+	console.log();
+	console.log('Attempting to start sage');
 	executeConsoleCommand('node server.js');
+	console.log('Should have started sage');
+	console.log();
+	console.log();
 }
 
 
