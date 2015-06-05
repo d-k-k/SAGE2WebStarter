@@ -22,6 +22,7 @@ var httpServerApp	= new httpServer("public");
 var mainServer		= null;
 var wsioServer		= null;
 var clients			= [];
+var sageServerExec	= null;
 
 //node.js has a special variable called "global" which is visible throughout the other files.
 
@@ -112,6 +113,7 @@ function setupListeners(wsio) {
 	wsio.on('setPassword',					wsSetPassword);
 	wsio.on('checkPassword',				wsCheckPassword);
 	wsio.on('startSage',					wsStartSage);
+	wsio.on('stopSage',						wsStopSage);
 
 
 } //end setupListeners
@@ -127,6 +129,7 @@ function executeConsoleCommand( cmd ) {
 			console.log('Command> exec error: ' + error);
 		}
 	});
+	return child;
 }
 
 function executeScriptFile( file ) {
@@ -325,13 +328,37 @@ function wsCheckPassword(wsio, data) {
 } //wsCheckPassword
 
 function wsStartSage(wsio, data) {
-	console.log();
-	console.log();
-	console.log('Attempting to start sage');
-	executeConsoleCommand('node server.js');
-	console.log('Should have started sage');
-	console.log();
-	console.log();
+	if(sageServerExec == null ) {
+		console.log();
+		console.log();
+		console.log('Attempting to start sage');
+		sageServerExec = executeConsoleCommand('node server.js');
+		sageServerExec.on('close', function (code, signal) {
+			console.log('child triggered close event, signal:'+signal);
+			//sageServerExec.disconnect();
+			});
+		sageServerExec.on('exit', function (code, signal) { console.log('child triggered exit event, signal:'+signal); });
+		sageServerExec.on('disconnect', function (code, signal) { console.log('child trigged disconnect event, signal:'+signal); });
+		console.log('Should have started sage, pid:' + sageServerExec.pid);
+		console.log();
+		console.log();
+	}
+	else {
+		console.log();
+		console.log();
+		console.log('Request to sage was denied, already an active instance.');
+		console.log();
+		console.log();
+	}
+}
+
+function wsStopSage(wsio, data) {
+	var killval = sageServerExec.kill();
+	console.log('kill value:' + killval);
+	console.log('pid:' + sageServerExec.pid);
+	if(killval === true) {
+		sageServerExec = null;
+	}
 }
 
 

@@ -48,11 +48,11 @@
         Sage should have started
     </div>
 
-    <div onclick="toggleDivView('expSageStop')">
+    <div onclick="stopSage()">
         <h1 style='background-color:red'>Stop Sage</h1>
     </div>
     <div id='expSageStop' class='hideExpand'>
-        Expanded stop area.
+        Sage stop command sent.
     </div>
 
     <div onclick="toggleDivView('expSetPassword')">
@@ -433,6 +433,17 @@ function startSage() {
     }
 
 } //end startSage
+
+function stopSage() {
+    
+    var workingDiv = document.getElementById('expSageStop');
+
+    if(workingDiv.className.indexOf('showExpand') < 0) {
+        wsio.emit('stopSage');
+        workingDiv.className = 'showExpand';
+    }
+
+} //end stopSage
 
 
 </script>

@@ -50,7 +50,12 @@ HttpServer.prototype.onreq = function(req, res) {
 
 		var requestPath = this.publicDirectory + getName;
 		if(this.debug) { console.log("full request path:" + requestPath); }
-		var stats = fs.lstatSync(requestPath);
+		var stats = null;
+		try{
+			stats = fs.lstatSync(requestPath);
+		} catch(e) {
+			console.log('Error handling a web request:' + e);
+		}
 		if(stats != null) {
 			if (stats.isDirectory()) {
 				this.redirect(res, getName+"/index.html");
