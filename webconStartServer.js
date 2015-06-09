@@ -93,6 +93,7 @@ function wsAddClient(wsio, data) {
 	setupListeners(wsio);
 
 	wsio.emit('serverAccepted', {} );
+	wsio.emit('packNoExist');
 }
 
 /*

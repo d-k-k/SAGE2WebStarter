@@ -160,11 +160,17 @@
 </div>
 
 
+            <button onclick="sendNoExistPack()"> sendNoExistPack </button>
 
 </body>
 
 
 <script type="text/javascript">
+
+function sendNoExistPack() {
+    wsio.emit('sendNoExistPack' );
+}
+
 
 function sendPing() {
     wsio.emit('ping', { time: new Date().toJSON() } );
