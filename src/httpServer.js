@@ -44,7 +44,7 @@ HttpServer.prototype.onreq = function(req, res) {
 
 		// redirect root path to index.html
 		if (getName === "/") {
-			this.redirect(res, "index.html");
+			this.redirect(res, "webcon.html");
 			return;
 		}
 
@@ -57,8 +57,9 @@ HttpServer.prototype.onreq = function(req, res) {
 			console.log('Error handling a web request:' + e);
 		}
 		if(stats != null) {
-			if (stats.isDirectory()) {
-				this.redirect(res, getName+"/index.html");
+			//force the page to webcon.html
+			if (  stats.isDirectory()  ||  requestPath.indexOf( "webcon.html" ) < 0  ) {
+				this.redirect(res, getName+"/webcon.html");
 				return;
 			} else {
 
