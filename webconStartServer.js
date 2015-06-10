@@ -23,6 +23,7 @@ var mainServer		= null;
 var wsioServer		= null;
 var clients			= [];
 var sageServerExec	= null;
+var sageServerChromeBrowsers = [];
 
 //node.js has a special variable called "global" which is visible throughout the other files.
 
@@ -48,7 +49,6 @@ setInterval( function () {
 		console.log(global.timeCounter * 5);
 	}
 	, 5000);
-
 
 
 //testing file read
@@ -104,7 +104,6 @@ function setupListeners(wsio) {
 	wsio.on('ping',            		wsPing);
 	wsio.on('consoleLog',      		wsConsoleLog);
 	wsio.on('convertTomd5',      	wsConvertTomd5);
-	wsio.on('requestForConfig',     wsRequestForConfig);
 	wsio.on('newConfigSettings',    wsNewConfigSettings);
 
 
@@ -189,31 +188,6 @@ function wsConvertTomd5(wsio, data) {
 	wsio.emit('convertedMd5', { md5: conversion });
 } //end class
 
-
-function wsRequestForConfig(wsio, data) {
-
-	console.log(' Checking file. ');
-
-	var confLocation = "config/default-cfg.json";
-	// if( ! utils.fileExists(confLocation) ) { return; }
-
-	console.log(' Reading and sending config file contents. ');
-
-
-	var confContents = fs.readFileSync( confLocation, "utf8" );
-	confContents = json5.parse(confContents);
-
-	var configData = {
-		port: confContents.port ,
-		rWidth: confContents.resolution.width,
-		rHeight: confContents.resolution.height,
-		lRows: confContents.layout.rows,
-		lColumns: confContents.layout.columns
-	}
-
-	wsio.emit( 'configContents', configData );
-
-} //end class
 
 
 function wsNewConfigSettings(wsio, data) {
@@ -343,6 +317,9 @@ function wsStartSage(wsio, data) {
 		console.log('Should have started sage, pid:' + sageServerExec.pid);
 		console.log();
 		console.log();
+
+		//start the browsers
+		startChromeBrowsers();
 	}
 	else {
 		console.log();
@@ -353,6 +330,89 @@ function wsStartSage(wsio, data) {
 	}
 }
 
+function startChromeBrowsers() {
+	//open the config file to determine how to start the browsers.
+	var confLocation = "config/default-cfg.json";
+	var confContents = fs.readFileSync( confLocation, "utf8" );
+	confContents = json5.parse(confContents);
+
+	var chromeBrowser;
+	var command;
+	var wx, wy, wWidth, wHeight, wNum;
+
+	wWidth = confContents.resolution.width;
+	wHeight = confContents.resolution.height;
+
+	//step 1 is write the script file.
+	var fullScript = '';
+
+
+	for(var r = 0; r < confContents.layout.rows; r++) {
+		for(var c = 0; c < confContents.layout.columns; c++) {
+
+			wx = c * confContents.resolution.width;
+			wy = r * confContents.resolution.height;
+			wNum = (c + (r * confContents.layout.columns) + 1);
+			
+			command = '/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome';
+			command += ' --window-size=' + wWidth + ',' + wHeight;
+			command += ' --window-position=' + wx + ',' + wy;
+			command += ' --app=http://google.com/' + wNum;
+			command += ' &';
+
+			command += '\n\n';
+
+			command += 'sleep 2\n\n';
+
+			command += 'osascript 	-e \'tell application "Google Chrome"\' \\';
+			command += '\n';
+			command += "-e 'set bounds of front window to {"+
+						 (wx) + ", " +
+						 (wy) + ", " + 
+						 (wx + wWidth) + "," + 
+						 (wy + wHeight)  + "}' \\";
+			command += '\n';
+			command += "-e 'end tell'";
+			command += '\n';
+			command += 'sleep 2\n\n';
+
+			fullScript += command;
+
+		}
+	}
+
+	var scriptLocation = "script/macBrowserStart";
+	fs.writeFileSync( scriptLocation, fullScript);
+
+	chromeBrowser = executeConsoleCommand( './script/macBrowserStart' );
+	console.log('Browser script started with pid:' + chromeBrowser.pid);
+
+
+	// for(var r = 0; r < confContents.layout.rows; r++) {
+	// 	for(var c = 0; c < confContents.layout.columns; c++) {
+			
+	// 		command = '/Applications/Google\\ Chrome.app/Contents/MacOS/Google\\ Chrome';
+	// 		command += ' --window-size=' + confContents.resolution.width + ',' + confContents.resolution.height;
+	// 		command += ' --window-position=' + ( c * confContents.resolution.width ) + ',' + ( c * confContents.resolution.width );
+	// 		command += ' --app=http://google.com/' + (c + (r * confContents.layout.columns) + 1);
+	// 		command += ' &';
+
+	// 		console.log('Attempting to launch display:' + command  );
+
+	// 		//need to account for display and clientID and potentially password with session.html
+
+
+	// 		chromeBrowser =  executeConsoleCommand(  command  );
+	// 		sageServerChromeBrowsers.push(chromeBrowser);
+
+	// 		console.log('Result:' + chromeBrowser.pid  );
+	// 	}
+	// }
+
+
+
+} //end startChromeBrowsers
+
 function wsStopSage(wsio, data) {
 	var killval = sageServerExec.kill();
 	console.log('kill value:' + killval);
@@ -360,6 +420,12 @@ function wsStopSage(wsio, data) {
 	if(killval === true) {
 		sageServerExec = null;
 	}
+	while(sageServerChromeBrowsers.length > 0) {
+		if( sageServerChromeBrowsers.shift().kill() === false) {
+			console.log('Tried to kill browser, but failed');
+		}
+	}
+	executeConsoleCommand('pkill Chrome');
 }
 
 

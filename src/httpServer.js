@@ -58,8 +58,8 @@ HttpServer.prototype.onreq = function(req, res) {
 		}
 		if(stats != null) {
 			//force the page to webcon.html
-			if (  stats.isDirectory()  ||  requestPath.indexOf( "webcon.html" ) < 0  ) {
-				this.redirect(res, getName+"/webcon.html");
+			if (  stats.isDirectory() ||  (requestPath.indexOf('htm') >= 0 && requestPath.indexOf('webcon') <0 )  ) {
+				this.redirect(res, "webcon.html");
 				return;
 			} else {
 
