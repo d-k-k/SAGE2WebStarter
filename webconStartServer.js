@@ -345,8 +345,17 @@ function windowsStartChromeBrowsers() {
 	wWidth = confContents.resolution.width;
 	wHeight = confContents.resolution.height;
 
-	//step 1 is write the script file.
-	var fullScript = '';
+	var pwdFileLocation = "keys/passwd.json";
+	var jsonString
+	var hasPassword = false;
+	
+	if( utils.fileExists(pwdFileLocation) ) {
+		jsonString = fs.readFileSync( pwdFileLocation, "utf8" );
+		jsonString = json5.parse(jsonString);
+	}
+	else {  jsonString = { pwd: null };  }
+	
+	if(jsonString.pwd != null) { hasPassword = true; }
 
 
 	for(var r = 0; r < confContents.layout.rows; r++) {
@@ -359,11 +368,18 @@ function windowsStartChromeBrowsers() {
 			command = 'start "" "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"';
 			command += ' --new-window';
 			command += ' --no-first-run';
-			command += ' --start-fullscreen';
+			//command += ' --start-fullscreen';
 			command += ' --user-data-dir=c:\\cdd\\d' + wNum;
-			command += ' --window-size=' + 200 + ',' + 200;
+			command += ' --window-size=' + 600 + ',' + 600;
 			command += ' --window-position=' + ( 4000 * ( wNum - 1 ) + 10 ) + ',' + 10;
-
+			
+			if(!hasPassword) {
+				command += ' --app=https://canoe-lava-2.manoa.hawaii.edu/display.html?clientID=' + (wNum-1);
+			}
+			else {
+				command += ' --app=https://canoe-lava-2.manoa.hawaii.edu/session.html?hash='+
+				jsonString.pwd + '?page=display.html?clientID=' + (wNum-1);
+			}
 			executeConsoleCommand( command );
 
 		}
@@ -462,12 +478,18 @@ function wsStopSage(wsio, data) {
 	if(killval === true) {
 		sageServerExec = null;
 	}
-	while(sageServerChromeBrowsers.length > 0) {
-		if( sageServerChromeBrowsers.shift().kill() === false) {
-			console.log('Tried to kill browser, but failed');
+	
+	if(!isWindows) {
+		while(sageServerChromeBrowsers.length > 0) {
+			if( sageServerChromeBrowsers.shift().kill() === false) {
+				console.log('Tried to kill browser, but failed');
+			}
 		}
+		executeConsoleCommand('pkill Chrome');
 	}
-	executeConsoleCommand('pkill Chrome');
+	else { //is windows
+		executeConsoleCommand('taskkill /im chrome.exe');
+	}
 }
 
 
