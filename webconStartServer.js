@@ -24,6 +24,7 @@ var wsioServer		= null;
 var clients			= [];
 var sageServerExec	= null;
 var sageServerChromeBrowsers = [];
+var isWindows		= true;
 
 //node.js has a special variable called "global" which is visible throughout the other files.
 
@@ -319,7 +320,8 @@ function wsStartSage(wsio, data) {
 		console.log();
 
 		//start the browsers
-		startChromeBrowsers();
+		if(isWindows) { windowsStartChromeBrowsers(); }
+		else { macStartChromeBrowsers(); }
 	}
 	else {
 		console.log();
@@ -330,7 +332,47 @@ function wsStartSage(wsio, data) {
 	}
 }
 
-function startChromeBrowsers() {
+function windowsStartChromeBrowsers() {
+	//open the config file to determine how to start the browsers.
+	var confLocation = "config/default-cfg.json";
+	var confContents = fs.readFileSync( confLocation, "utf8" );
+	confContents = json5.parse(confContents);
+
+	var chromeBrowser;
+	var command;
+	var wx, wy, wWidth, wHeight, wNum;
+
+	wWidth = confContents.resolution.width;
+	wHeight = confContents.resolution.height;
+
+	//step 1 is write the script file.
+	var fullScript = '';
+
+
+	for(var r = 0; r < confContents.layout.rows; r++) {
+		for(var c = 0; c < confContents.layout.columns; c++) {
+
+			wx = c * confContents.resolution.width;
+			wy = r * confContents.resolution.height;
+			wNum = (c + (r * confContents.layout.columns) + 1);
+			
+			command = 'start "" "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"';
+			command += ' --new-window';
+			command += ' --no-first-run';
+			command += ' --start-fullscreen';
+			command += ' --user-data-dir=c:\\cdd\\d' + wNum;
+			command += ' --window-size=' + 200 + ',' + 200;
+			command += ' --window-position=' + ( 4000 * ( wNum - 1 ) + 10 ) + ',' + 10;
+
+			executeConsoleCommand( command );
+
+		}
+	}
+	console.log('Browser script started');
+
+} //end windowsStartChromeBrowsers
+
+function macStartChromeBrowsers() {
 	//open the config file to determine how to start the browsers.
 	var confLocation = "config/default-cfg.json";
 	var confContents = fs.readFileSync( confLocation, "utf8" );
@@ -411,7 +453,7 @@ function startChromeBrowsers() {
 
 
 
-} //end startChromeBrowsers
+} //end macStartChromeBrowsers
 
 function wsStopSage(wsio, data) {
 	var killval = sageServerExec.kill();
