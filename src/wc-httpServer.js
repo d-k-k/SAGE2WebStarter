@@ -7,7 +7,7 @@ var url 	= require('url');
 var fs 		= require('fs');
 var mime 	= require('mime');
 
-var utils 	= require('../src/utils');    // provides utility functions
+var utils 	= require('../src/wc-utils');    // provides utility functions
 
 /**
  * SAGE HTTP request handlers for GET and POST
@@ -61,7 +61,7 @@ HttpServer.prototype.onreq = function(req, res) {
 			//get cookies and see if it matches the webcon password
 			var cookieList = detectCookies(req);
 			var webconMatch = false;
-			for (i = 0; i < cookieList.length; i++) {
+			for (var i = 0; i < cookieList.length; i++) {
 				if (cookieList[i].indexOf("webcon=") !== -1) {
 					// We found it
 					if (cookieList[i].indexOf(global.webconID) !== -1) {
@@ -69,18 +69,23 @@ HttpServer.prototype.onreq = function(req, res) {
 					}
 				}
 			}
+			if(global.webconID === -1) { console.log('http - Warning webconID hasnt been setup'); console.log(); }
 
 			
 			if( stats.isDirectory() ) {//force the page to webcon.html if a directory
+				console.log('http - preventing folder access, redirecting to webcon');
 				this.redirect(res, "webcon.html");
 				return;
 			}
-			//force the page to webcon.html if accessing a page that isn't login or config
-			else if( requestPath.indexOf('wcLogin') < 0 ) { //&&  requestPath.indexOf('config') < 0 ) {
+			//if requesting a webpage that is not webcon or login force to webcon.html
+			else if( requestPath.indexOf('htm') >= 0 && requestPath.indexOf('webcon') < 0 && requestPath.indexOf('wcLogin') < 0 ) { //&&  requestPath.indexOf('config') < 0 ) {
+				console.log('http - preventing access to:' + requestPath + ', redirecting to webcon');
 				this.redirect(res, "webcon.html");
 				return;
 			}
-			else if(!webconMatch) { //force the page to login if failed credentials
+			//if bad credential and requesting a webpage that is not login
+			else if(!webconMatch && requestPath.indexOf('htm') > 0 && requestPath.indexOf('wcLogin') < 0 ) {
+				console.log('http - credential mismatch, redirecting to login');
 				this.redirect(res, "wcLogin.html");
 			}
 			else {

@@ -53,7 +53,7 @@ if( utils.fileExists(pwdFileLocation) ) {
 	jsonString = fs.readFileSync( pwdFileLocation, "utf8" );
 	jsonString = json5.parse(jsonString);
 }
-else {  jsonString = { pwd: -1 };  }
+else {  jsonString = { pwd: -1 }; console.log('--WARNING--');console.log('webcon password has not been setup correctly'); console.log(); }
 global.webconID = jsonString.pwd;
 
 console.log('The webcon hash is:' + global.webconID);
@@ -280,13 +280,13 @@ function wsGiveServerConfiguration(wsio, data) {
 function wsSetPassword(wsio, data) {
 	//var conversion = md5.getHash( data.password );
 	var jsonString = { "pwd": data.password};
-	jsonString = json5.stringify(jsonString);
-	jsonString = '{ "pwd" : "' + conversion +'" }';
+	//jsonString = json5.stringify(jsonString);
+	jsonString = '{ "pwd" : "' + data.password +'" }';
 	var pwdFileLocation = "keys/passwd.json";
 	console.log('Pasword save double checking:' + jsonString);
 	fs.writeFileSync( pwdFileLocation, jsonString);
-
-	wsio.emit('passwordSet');
+	console.log();
+	wsio.emit('displayOverlayMessage', { message: 'The meetingID has been set' });
 } //wsSetPassword
 
 

@@ -183,9 +183,10 @@ function wsPasswordCheckResult(data) {
 
 
 function wsDisplayOverlayMessage(data) {	
+	console.log( 'Displaying message from server:' + data.message );
 	var workingDiv;
 	workingDiv = document.getElementById('overlayDiv');
-	workingDiv.style.display = 'visible';
+	workingDiv.className = 'showExpand';
 
 	workingDiv = document.getElementById('overlayMessage');
 	workingDiv.innerHTML = data.message;
