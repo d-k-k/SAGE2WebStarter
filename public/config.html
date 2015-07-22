@@ -10,7 +10,6 @@
     <title>Test page for ping and console</title>
 
     <script type="text/javascript" src="src/websocket.io.js"></script>
-    <script type="text/javascript" src="src/md5.js"></script>
     <script type="text/javascript" src="src/wc-pacSetup.js"></script>
 
     <style> 
@@ -36,36 +35,120 @@
 
 </head>
 
-<body onload="initialize()" style="background-color:lightblue;">
+<body onload="initialize()">
 
 
 
-<div style="text-align:center; background-color:lightblue; width:50%; top:5%; left:25%;position:absolute">
+<div style="text-align:center; background-color:lightblue">
 
     <div onclick="startSage()">
-        <h1 style='background-color:green'>Start SAGE2</h1>
+        <h1 style='background-color:green'>Start Sage</h1>
     </div>
     <div id='expSageStart' class='hideExpand'>
-        SAGE2 should have started
+        Sage should have started
     </div>
 
     <div onclick="stopSage()">
-        <h1 style='background-color:red'>Stop SAGE2</h1>
+        <h1 style='background-color:red'>Stop Sage</h1>
     </div>
     <div id='expSageStop' class='hideExpand'>
-        SAGE2 stop command sent.
+        Sage stop command sent.
     </div>
 
     <div onclick="toggleDivView('expSetPassword')">
-        <h1 style='background-color:gray'>Set meetingID</h1>
+        <h1 style='background-color:gray'>Set Password</h1>
     </div>
-    <div id='expSetPassword' class='hideExpand' style='background-color:gray'>
-        Will take effect on next SAGE2 startup.
-        <br><br>
-        <input type="text" id="setPasswordValue">
-        <br><br>
-        <button onclick="setPasswordToServer()" >Set ID</button>
+    <div id='expSetPassword' class='hideExpand'>
+        Will take effect on next Sage startup.
         <br>
+        <input type="text" id="setPasswordValue">
+        <br>
+        <button onclick="setPasswordToServer()"> Set Password </button>
+        <br><br><br>
+        Test current password:
+        <br>
+        <input type="text" id="checkPasswordValue">
+        <br>
+        <button onclick="checkPasswordToServer()"> Check Password </button>
+        <br>
+        <div id='checkPasswordResult'> </div>
+    </div>
+
+    <div onclick="toggleDivView('expConfiguration')">
+        <h1 style='background-color:gray'>Configuration</h1>
+    </div>
+    <div id='expConfiguration' class='hideExpand'>
+
+        Required Configuration Settings<br><br><br><br>
+
+
+
+        Host name / ip: <input type="text" id="cfgHost"> (⍰)
+        <br>
+        Port: <input type="text" id="cfgPortDefault"> (Default: 80 )
+        <br>
+        HTTPS Port: <input type="text" id="cfgPortSecure"> (Default: 443 )
+        <br>
+        Resolution:
+        <br>
+        --Width <input type="text" id="cfgRwidth">
+        <br>
+        --Height <input type="text" id="cfgRheight">
+        <br>
+        Layout:
+        <br>
+        --Columns <input type="text" id="cfgLcolumns"> (Width)
+        <br>
+        --Rows <input type="text" id="cfgLrows"> (Height)
+        <br>
+        Alternate Hosts:
+        <br>
+            <div id='cfgAH'>
+                <input type='text' id='cfgAH1'>
+            </div>
+            <button onclick="removeAlternativeHostEntry()"> Remove </button>
+            <button onclick="addAlternativeHostEntry()"> Add </button>
+        <br>
+        Remote Sites:
+        <br>
+            <div id='cfgRS'>
+                Site 1:<br>
+                Name:<input type='text' id='cfgRS1name'>
+                <br>
+                Host:<input type='text' id='cfgRS1host'>
+                <br>
+                Port:<input type='text' id='cfgRS1port'>
+                <br>
+                Secure:<input type='text' id='cfgRS1secure'>
+                <br>
+            </div>
+            <button onclick="removeRemoteSiteEntry()"> Remove </button>
+            <button onclick="addRemoteSiteEntry()"> Add </button>
+        <br>
+        Dependency Location:
+        <br>
+        ImageMagick:<input type='text' id='cfgDependencyIM'>
+        <br>
+        FFMpeg:<input type='text' id='cfgDependencyFFM'>
+        <br>
+        <br>
+
+        <button onclick="sendConfigFileData()"> Save </button>
+
+
+        <div onclick="toggleDivView('expConfiguration1')">
+            <h2 style='background-color:gray'>Show Config 1</h2>
+        </div>
+        <div id='expConfiguration1' class='hideExpand'>
+            Expanded sub configuration area 1
+        </div>
+
+        <div onclick="toggleDivView('expConfiguration2')">
+            <h2 style='background-color:gray'>Show Config 2</h2>
+        </div>
+        <div id='expConfiguration2' class='hideExpand'>
+            Expanded sub configuration area 2
+        </div>
     </div>
 
 
@@ -76,52 +159,22 @@
 
 </div>
 
-<div id='overlayDiv' style='
-            width:100%;
-            height:100%;
-            display:none'> 
-    <div id='overlayBack' 
-        style=' position:absolute;
-                width:100%;
-                height:100%;
-                background-color: gray;
-                opacity:0.4 ' >
 
-        
-    </div>
-    <div    id='   overlayMessage' 
-            style=' border-radius:25px;
-                    border: 10px solid black;
-                    padding: 2%;
-                    width: 30%;
-                    height: 10%;
-                    text-align:center;
-                    position:absolute;
-                    left: 35%;
-                    top: 30%;
-                    background-color:white;
-                    opacity: 1'
-    >
-    longer message
-    </div>
-
-    <button onclick="hideOverlayMessage()"
-            style=' width: 5%;
-                    height: 4%;
-                    text-align:center;
-                    position:absolute;
-                    left: 50%;
-                    top: 40%;
-                    background-color:white;
-                    opacity: 1'> OK </button>
-
-</div>
-
+            <button onclick="sendNoExistPack()"> sendNoExistPack </button>
 
 </body>
 
 
 <script type="text/javascript">
+
+function sendNoExistPack() {
+    wsio.emit('sendNoExistPack' );
+}
+
+
+function sendPing() {
+    wsio.emit('ping', { time: new Date().toJSON() } );
+}
 
 function sendConsoleLog() {
     wsio.emit('consoleLog', { comment: 'button was pressed' } );
@@ -360,11 +413,9 @@ function sendConfigFileData() {
 function setPasswordToServer() {
     var workingDiv = document.getElementById('setPasswordValue');
     var packet = {};
-    var typedValue = workingDiv.value.trim();
-    packet.password = md5(typedValue);
+    packet.password = workingDiv.value.trim();
 
-    console.log('Setting    ' + typedValue + '    as the new password.');
-    console.log('Packet contains hash:    ' + packet.password );
+    console.log('Sending    ' + packet.password + '    as the new password.');
 
     wsio.emit('setPassword', packet);
 }
@@ -381,23 +432,22 @@ function checkPasswordToServer() {
 function startSage() {
     
     var workingDiv = document.getElementById('expSageStart');
-    wsio.emit('startSage');
-    // if(workingDiv.className.indexOf('showExpand') < 0) {
-    //     wsio.emit('startSage');
-    //     workingDiv.className = 'showExpand';
-    // }
 
+    if(workingDiv.className.indexOf('showExpand') < 0) {
+        wsio.emit('startSage');
+        workingDiv.className = 'showExpand';
+    }
 
 } //end startSage
 
 function stopSage() {
     
     var workingDiv = document.getElementById('expSageStop');
-    wsio.emit('stopSage');
-    // if(workingDiv.className.indexOf('showExpand') < 0) {
-    //     wsio.emit('stopSage');
-    //     workingDiv.className = 'showExpand';
-    // }
+
+    if(workingDiv.className.indexOf('showExpand') < 0) {
+        wsio.emit('stopSage');
+        workingDiv.className = 'showExpand';
+    }
 
 } //end stopSage
 

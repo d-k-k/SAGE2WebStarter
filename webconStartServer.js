@@ -10,10 +10,10 @@ var json5        	= require('json5');            // format that allows comments
 var exec 			= require('child_process').exec;
 var spawn 			= require('child_process').spawn;
 
-var httpServer   	= require('./src/httpServer');
-var WebSocketIO		= require('./src/wsio');
 var md5				= require('./src/md5');                   // return standard md5 hash of given param
-var utils			= require('./src/utils');
+var httpServer   	= require('./src/wc-httpServer');
+var WebSocketIO		= require('./src/wc-wsio');
+var utils			= require('./src/wc-utils');
 
 //---------------------------------------------------------------------------Variable setup
 var hostAddress		= "127.0.0.1";
@@ -34,6 +34,7 @@ var isWindows		= true;
 //create http listener
 
 mainServer = http.createServer( httpServerApp.onrequest ).listen(hostPort);
+console.log('--SAGE2 web control starting--');
 console.log('Server listening to port:'+hostPort);
 
 
@@ -43,6 +44,19 @@ wsioServer.onconnection(openWebSocketClient);
 
 //create timer counter in global. 
 global.timeCounter = 0;
+
+
+
+var pwdFileLocation = "keys/webconPasswd.json";
+var jsonString;
+if( utils.fileExists(pwdFileLocation) ) {
+	jsonString = fs.readFileSync( pwdFileLocation, "utf8" );
+	jsonString = json5.parse(jsonString);
+}
+else {  jsonString = { pwd: -1 };  }
+global.webconID = jsonString.pwd;
+
+console.log('The webcon hash is:' + global.webconID);
 
 //Test to create something that happens at an interval
 setInterval( function () {
@@ -264,8 +278,8 @@ function wsGiveServerConfiguration(wsio, data) {
 } //wsGiveServerConfiguration
 
 function wsSetPassword(wsio, data) {
-	var conversion = md5.getHash( data.password );
-	var jsonString = { "pwd": conversion};
+	//var conversion = md5.getHash( data.password );
+	var jsonString = { "pwd": data.password};
 	jsonString = json5.stringify(jsonString);
 	jsonString = '{ "pwd" : "' + conversion +'" }';
 	var pwdFileLocation = "keys/passwd.json";
@@ -322,6 +336,8 @@ function wsStartSage(wsio, data) {
 		//start the browsers
 		if(isWindows) { windowsStartChromeBrowsers(); }
 		else { macStartChromeBrowsers(); }
+
+		wsio.emit( 'displayOverlayMessage', {message: 'SAGE2 is starting'} );
 	}
 	else {
 		console.log();
@@ -329,6 +345,7 @@ function wsStartSage(wsio, data) {
 		console.log('Request to sage was denied, already an active instance.');
 		console.log();
 		console.log();
+		wsio.emit( 'displayOverlayMessage', {message: 'SAGE2 is already running.'} );
 	}
 }
 
@@ -490,6 +507,8 @@ function wsStopSage(wsio, data) {
 	else { //is windows
 		executeConsoleCommand('taskkill /im chrome.exe');
 	}
+
+	wsio.emit( 'displayOverlayMessage', { message: 'SAGE2 stop command sent' } );
 }
 
 

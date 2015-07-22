@@ -57,11 +57,33 @@ HttpServer.prototype.onreq = function(req, res) {
 			console.log('Error handling a web request:' + e);
 		}
 		if(stats != null) {
-			//force the page to webcon.html
-			if (  stats.isDirectory() ||  (requestPath.indexOf('htm') >= 0 && requestPath.indexOf('webcon') <0 )  ) {
+
+			//get cookies and see if it matches the webcon password
+			var cookieList = detectCookies(req);
+			var webconMatch = false;
+			for (i = 0; i < cookieList.length; i++) {
+				if (cookieList[i].indexOf("webcon=") !== -1) {
+					// We found it
+					if (cookieList[i].indexOf(global.webconID) !== -1) {
+						webconMatch = true;
+					}
+				}
+			}
+
+			
+			if( stats.isDirectory() ) {//force the page to webcon.html if a directory
 				this.redirect(res, "webcon.html");
 				return;
-			} else {
+			}
+			//force the page to webcon.html if accessing a page that isn't login or config
+			else if( requestPath.indexOf('wcLogin') < 0 ) { //&&  requestPath.indexOf('config') < 0 ) {
+				this.redirect(res, "webcon.html");
+				return;
+			}
+			else if(!webconMatch) { //force the page to login if failed credentials
+				this.redirect(res, "wcLogin.html");
+			}
+			else {
 
 				var header = {};
 				header["Content-Type"] = mime.lookup(requestPath);
@@ -135,6 +157,31 @@ HttpServer.prototype.redirect = function(res, aurl) {
 	res.writeHead(302, {'Location': aurl});
 	res.end();
 };
+
+
+/**
+ * Given a request, will attempt to detect all associated cookies.
+ *
+ * @method detectCookies
+ * @param request {Object} the request that came from a client
+ * @return {Object} containing the list of cookies in string format
+ */
+function detectCookies(request) {
+	var cookieList = [];
+	var allCookies = request.headers.cookie;
+
+	var i = 0;
+	if (allCookies != null) {
+		while (allCookies.indexOf(';') !== -1) {
+			cookieList.push(allCookies.substring(0, allCookies.indexOf(';')));
+			cookieList[i] = cookieList[i].trim();
+			allCookies    = allCookies.substring(allCookies.indexOf(';') + 1);
+			i++;
+		} // end while there is a ;
+		cookieList.push(allCookies.trim());
+	}
+	return cookieList;
+}
 
 
 module.exports = HttpServer;

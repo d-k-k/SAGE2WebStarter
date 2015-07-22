@@ -82,6 +82,8 @@ function setupListeners() {
 	wsio.on('configurationSet', 			function(data) { console.log('The configuration file has been confirmed to be updated by server'); });
 	wsio.on('passwordCheckResult', 			wsPasswordCheckResult );
 
+	wsio.on('displayOverlayMessage', 		wsDisplayOverlayMessage);
+
 }
 
 function wsConvertedMd5 (data) {
@@ -180,6 +182,15 @@ function wsPasswordCheckResult(data) {
 } //end wsPasswordCheckResult
 
 
+function wsDisplayOverlayMessage(data) {	
+	var workingDiv;
+	workingDiv = document.getElementById('overlayDiv');
+	workingDiv.style.display = 'visible';
+
+	workingDiv = document.getElementById('overlayMessage');
+	workingDiv.innerHTML = data.message;
+
+} //end wsDisplayOverlayMessage
 
 
 
