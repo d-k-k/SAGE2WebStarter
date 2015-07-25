@@ -61,7 +61,7 @@ console.log('The webcon hash is:' + global.webconID);
 //Test to create something that happens at an interval
 setInterval( function () {
 		global.timeCounter++;
-		console.log(global.timeCounter * 5);
+		//console.log(global.timeCounter * 5);
 	}
 	, 5000);
 
@@ -322,7 +322,7 @@ function wsStartSage(wsio, data) {
 		console.log();
 		console.log();
 		console.log('Attempting to start sage');
-		sageServerExec = executeConsoleCommand('node server.js');
+		sageServerExec = executeConsoleCommand('node server.js -f config/canoe-lava-2-FF-cfg.json');
 		sageServerExec.on('close', function (code, signal) {
 			console.log('child triggered close event, signal:'+signal);
 			//sageServerExec.disconnect();
@@ -334,8 +334,10 @@ function wsStartSage(wsio, data) {
 		console.log();
 
 		//start the browsers
-		if(isWindows) { windowsStartChromeBrowsers(); }
-		else { macStartChromeBrowsers(); }
+		//if(isWindows) { windowsStartChromeBrowsers(); }
+		//else { macStartChromeBrowsers(); }
+		
+		executeConsoleCommand('wcWinStart.bat');
 
 		wsio.emit( 'displayOverlayMessage', {message: 'SAGE2 is starting'} );
 	}
@@ -505,7 +507,8 @@ function wsStopSage(wsio, data) {
 		executeConsoleCommand('pkill Chrome');
 	}
 	else { //is windows
-		executeConsoleCommand('taskkill /im chrome.exe');
+		//executeConsoleCommand('taskkill /im chrome.exe');
+		executeConsoleCommand('taskkill /im firefox.exe');
 	}
 
 	wsio.emit( 'displayOverlayMessage', { message: 'SAGE2 stop command sent' } );
