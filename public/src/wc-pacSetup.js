@@ -20,6 +20,8 @@ function initialize() {
 
 	if(debug){console.log("Initializing client");}
 
+	//fix the image size since it requires pixels.
+	setSageLogoSize();
 
 	// Create a connection to server
 	wsio = new WebsocketIO();
@@ -53,6 +55,31 @@ function initialize() {
 } //end initialize
 
 
+function setSageLogoSize() {
+	var workingDiv = document.getElementById('sageLogo');
+	var logoWidth = 800;
+	var logoHeight = 257;
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+	width = width/2; //50%
+	height = height * .1; //10%
+
+	var ratio = width / logoWidth;
+	if( (ratio * logoHeight) <= height) {
+		height = ratio * logoHeight;
+	}
+	else {
+		ratio = height / logoHeight;
+		width = ratio * logoWidth;
+	}
+
+	workingDiv.style.left = ( window.innerWidth/2 - width/2) + 'px';
+	workingDiv.style.top = window.innerHeight * .05 + 'px';
+	workingDiv.style.position = 'absolute';
+	workingDiv.width = width;
+	workingDiv.height = height;
+
+}
 
 
 

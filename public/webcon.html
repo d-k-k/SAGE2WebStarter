@@ -36,45 +36,78 @@
 
 </head>
 
-<body onload="initialize()" style="background-color:lightblue;">
+<body onload="initialize()">
 
+    <img id='sageLogo' src="images/sage2_logo.png" alt="SAGE2">
 
-
-<div style="text-align:center; background-color:lightblue; width:50%; top:5%; left:25%;position:absolute">
-
-    <div onclick="startSage()">
-        <h1 style='background-color:green'>Start SAGE2</h1>
-    </div>
-    <div id='expSageStart' class='hideExpand'>
-        SAGE2 should have started
-    </div>
-
-    <div onclick="stopSage()">
-        <h1 style='background-color:red'>Stop SAGE2</h1>
-    </div>
-    <div id='expSageStop' class='hideExpand'>
-        SAGE2 stop command sent.
+    <div onclick="startSage()" 
+        style='
+        background-color:#779242;
+        color:white;
+        position:absolute;
+        text-align:center;
+        width:50%;
+        height:12%;
+        top:20%;
+        left:25%
+        '>
+        <h1 >Start SAGE2</h1>
     </div>
 
-    <div onclick="toggleDivView('expSetPassword')">
-        <h1 style='background-color:gray'>Set meetingID</h1>
+    <div onclick="stopSage()"
+        style='
+        background-color:#933837;
+        color:white;
+        position:absolute;
+        text-align:center;
+        width:50%;
+        height:12%;
+        top:32%;
+        left:25%
+        '>
+        <h1>Stop SAGE2</h1>
     </div>
-    <div id='expSetPassword' class='hideExpand' style='background-color:gray'>
+    <div onclick="toggleDivView('expSetPassword')"
+        style='
+        background-color:#604B7A;
+        color:white;
+        position:absolute;
+        text-align:center;
+        width:50%;
+        height:12%;
+        top:44%;
+        left:25%
+        '>
+        <h1>Set Meeting ID</h1>
+    </div>
+    <div id='expSetPassword' class='hideExpand'
+        style='
+        background-color:#604B7A;
+        color:white;
+        position:absolute;
+        text-align:center;
+        width:50%;
+        top:56%;
+        left:25%;
+        '>
+        <br>
         Will take effect on next SAGE2 startup.
         <br><br>
         <input type="text" id="setPasswordValue">
         <br><br>
         <button onclick="setPasswordToServer()" >Set ID</button>
-        <br>
+        <br><br>
+
+        <div style='
+            position:absolute;
+            width:102%;
+            height:1%;
+            background-color:#FFFFFF;
+            top:0px;
+            left:-1%;
+            '>
+        </div>
     </div>
-
-
-    <div>
-        <br>
-    </div>
-
-
-</div>
 
 <div id='overlayDiv' style='
             width:100%;
