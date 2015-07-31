@@ -1,3 +1,9 @@
+
+;clear the screen
+Send {LWin Down}
+Send d
+Send {LWin Up}
+
 ; firefox binary
 IXE="C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
 
@@ -5,7 +11,7 @@ IXE="C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
 S2=http://canoe-lava-2.manoa.hawaii.edu/display.html?clientID=0
 
 ;Detect if a hash value is needed
-passwd = C:\0SageRecent\sage2\keys\passwd.json
+passwd = C:\0SageRecent\redo\sage2\keys\passwd.json
 hash = blank
 
 ;see if the file exists
@@ -53,11 +59,13 @@ S2WIN=SAGE2: Display
 
 ; Launch firefox
 ; audio manager first
-Run,%ixe% -P display1 %S2am%
+;Run,%ixe% -P display1 %S2am%
+
+;Sleep 100
 
 ; then the display since it will be full screen
 
-Run,%ixe% -P display1 %s2%
+Run,%ixe% -P display1 %s2% %S2am%
 
 ; Wait for the window to open
 WinWait, %S2WIN%
@@ -91,6 +99,12 @@ else {
 
 	; debug
 	; MsgBox, desktop %X1% %Y1% %Width% %Height%
+	
+	;attempt shift up
+	offset = 0
+	Y1 := Y1 - offset
+	Height := Height + offset
+	
 	
 	; send the move/resize command
 	WinMove, %S2WIN%,, X1, Y1, Width, Height

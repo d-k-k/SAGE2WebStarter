@@ -491,11 +491,13 @@ function macStartChromeBrowsers() {
 } //end macStartChromeBrowsers
 
 function wsStopSage(wsio, data) {
-	var killval = sageServerExec.kill();
-	console.log('kill value:' + killval);
-	console.log('pid:' + sageServerExec.pid);
-	if(killval === true) {
-		sageServerExec = null;
+	if(sageServerExec !== null) {
+		var killval = sageServerExec.kill();
+		console.log('kill value:' + killval);
+		console.log('pid:' + sageServerExec.pid);
+		if(killval === true) {
+			sageServerExec = null;
+		}
 	}
 	
 	if(!isWindows) {
@@ -508,7 +510,7 @@ function wsStopSage(wsio, data) {
 	}
 	else { //is windows
 		//executeConsoleCommand('taskkill /im chrome.exe');
-		executeConsoleCommand('taskkill /im firefox.exe');
+		executeConsoleCommand('taskkill /im firefox* /t' );
 	}
 
 	wsio.emit( 'displayOverlayMessage', { message: 'SAGE2 stop command sent' } );
